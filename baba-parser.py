@@ -3,8 +3,6 @@ from terminal_symbols import TERMINAL_SYMBOLS
 token_stream = []
 token_index = 0
 
-root_node = None    # root node of the parse tree; each node is a dictionary, must have a 'children' field
-
 def lex(string):
     word_list = string.split(' ')
     for word in word_list:
@@ -19,19 +17,18 @@ def tokenize(token_str):
     raise ValueError('{} is not a valid token'.format(token_str))
 
 def parse():
-    global root_node
-    
-    success, root_node = S()
-    return success
+    return S()
 
 def S():
+    global token_index
+    
     success, nodes = grammar_rule(Rule)
-    if success:
+    if success and token_index == len(token_stream):    # make sure we have matched the entire stream
         return True, {'children': nodes, 'value': nodes[0]['value']}
     else:
         success, nodes = grammar_rule(Rule, T_And, S)
 
-    if success:
+    if success and token_index == len(token_stream):
         return True, {'children': nodes, 'value': nodes[2]['value'] + nodes[0]['value']}
 
     return False, None
@@ -146,7 +143,7 @@ def Predicate():
 def Property_list():
     success, nodes = grammar_rule(T_Property, T_And, Property_list)
     if success:
-        return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}
+        return True, {'children': nodes, 'value': [nodes[0]['value']] + nodes[2]['value']}
     else:
         success, nodes = grammar_rule(T_Property)
 
@@ -215,12 +212,13 @@ def is_token(token_str):
     
 
 if __name__ == '__main__':
-    lex("BABA IS YOU")
-    # lex('BABA ON GRASS AND ON WALL IS YOU')
+    # lex("BABA IS YOU AND STOP")
+    lex('BABA ON GRASS AND ON WALL IS YOU AND STOP')
     print(token_stream)
 
     print('Try parsing...')
-    if parse():
+    success, root_node = parse()
+    if success:
         print(root_node['value'])
     else:
         print("parsing FAILED")
