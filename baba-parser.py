@@ -38,31 +38,31 @@ def S():
 
 def Rule():
     success, nodes = grammar_rule(Noun_phrase_list, Predicate_list)
-    # print(nodes)
-    for node in nodes:
-        print(node['value'])
     if success:
-        rules = []
-        for noun_conditions_map in nodes[0]['value']:
-            for noun, condition_list in noun_conditions_map.items():
-                if len(condition_list) == 0:
-                    for verb_targets_map in nodes[1]['value']:
-                        for verb, targets_list in verb_targets_map.items():
-                            for target in targets_list:
-                                rule = {'noun': noun, 'condition': None, 'verb': verb, 'target': target}
-                                rules.append(rule)
-                else:
-                    for condition in condition_list:
+        for node in nodes:
+            print(node['value'])
+        if success:
+            rules = []
+            for noun_conditions_map in nodes[0]['value']:
+                for noun, condition_list in noun_conditions_map.items():
+                    if len(condition_list) == 0:
                         for verb_targets_map in nodes[1]['value']:
                             for verb, targets_list in verb_targets_map.items():
                                 for target in targets_list:
-                                    rule = {'noun': noun, 'condition': condition, 'verb': verb, 'target': target}
+                                    rule = {'noun': noun, 'condition': None, 'verb': verb, 'target': target}
                                     rules.append(rule)
+                    else:
+                        for condition in condition_list:
+                            for verb_targets_map in nodes[1]['value']:
+                                for verb, targets_list in verb_targets_map.items():
+                                    for target in targets_list:
+                                        rule = {'noun': noun, 'condition': condition, 'verb': verb, 'target': target}
+                                        rules.append(rule)
 
-                
-                # print("Noun: {}".format(noun))
-                # print("Condition List: {}".format(condition_list))
-        return True, {'children': nodes, 'value': rules}
+                    
+                    # print("Noun: {}".format(noun))
+                    # print("Condition List: {}".format(condition_list))
+            return True, {'children': nodes, 'value': rules}
     
     return False, None
 
@@ -80,7 +80,6 @@ def Noun_phrase_list():
 
 def Noun_phrase():
     success, nodes = grammar_rule(Adjective, T_Noun, Preposition_phrase_list)
-    print(nodes)
     if success:
         return True, {'children': nodes, 'value': {
             nodes[1]['value']: nodes[0]['value'] + nodes[2]['value']    # noun mapped to list of conditions applying to that noun
@@ -96,16 +95,18 @@ def Adjective():
     return True, {'children': None, 'value': []}   # epsilon rule always matches
 
 def Preposition_phrase_list():
-    success, nodes = grammar_rule(Preposition_phrase)
+    success, nodes = grammar_rule(Preposition_phrase, T_And, Preposition_phrase_list)
+    if success:
+        return True, {'children': nodes, 'value': [nodes[0]['value']] + nodes[2]['value']}  # list of conditions
+    else:
+        success, nodes = grammar_rule(Preposition_phrase)
+
     if success:
         return True, {'children': nodes, 'value': [nodes[0]['value']]}  # list containing singular condition
     else:
-        success, nodes = grammar_rule(Preposition_phrase, T_And, Preposition_phrase_list)
-
-    if success:
-        return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}  # list of conditions
-    else:
         return True, {'children': None, 'value': []}   # epsilon rule always matches
+
+    return False, None
 
 def Preposition_phrase():
     success, nodes = grammar_rule(T_Preposition, T_Noun)
@@ -115,14 +116,14 @@ def Preposition_phrase():
     return False, None
 
 def Predicate_list():
-    success, nodes = grammar_rule(Predicate)
+    success, nodes = grammar_rule(Predicate, T_And, Predicate_list)
     if success:
-        return True, {'children': nodes, 'value': [nodes[0]['value']]}  # list containing singular verb to properties mapping
+        return True, {'children': nodes, 'value': [nodes[0]['value']] + nodes[2]['value']}    # list containing multiple verb to properties mappings
     else:
-        success, nodes = grammar_rule(Predicate, T_And, Predicate_list)
+        success, nodes = grammar_rule(Predicate)
 
     if success:
-        return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}    # list containing multiple verb to properties mappings
+        return True, {'children': nodes, 'value': [nodes[0]['value']]}  # list containing singular verb to properties mapping
     
     return False, None
 
@@ -140,15 +141,17 @@ def Predicate():
             nodes[0]['value']: [nodes[1]['value']]
         }}
 
-def Property_list():
-    success, nodes = grammar_rule(T_Property)
-    if success:
-        return True, {'children': nodes, 'value': [nodes[0]['value']]}
-    else:
-        success, nodes = grammar_rule(T_Property, T_And, Property_list)
+    return False, None
 
+def Property_list():
+    success, nodes = grammar_rule(T_Property, T_And, Property_list)
     if success:
         return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}
+    else:
+        success, nodes = grammar_rule(T_Property)
+
+    if success:
+        return True, {'children': nodes, 'value': [nodes[0]['value']]}
 
     return False, None
 
@@ -195,6 +198,9 @@ def grammar_rule(*symbols):
 
 def is_token(token_str):
     global token_index
+
+    if token_index >= len(token_stream):    # are at the end of the input
+        return False, None
     
     token, lexeme = token_stream[token_index]
     if token == token_str:
@@ -209,7 +215,8 @@ def is_token(token_str):
     
 
 if __name__ == '__main__':
-    lex('BABA ON GRASS AND ON WALL IS YOU')
+    lex("BABA IS YOU")
+    # lex('BABA ON GRASS AND ON WALL IS YOU')
     print(token_stream)
 
     print('Try parsing...')
