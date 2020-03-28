@@ -16,7 +16,7 @@ def tokenize(token_str):
         if token_str in lexeme_list:
             return (terminal, token_str)
     
-    raise ValueError("{} is not a valid token".format(token_str))
+    raise ValueError('{} is not a valid token'.format(token_str))
 
 def parse():
     global root_node
@@ -25,27 +25,156 @@ def parse():
     return success
 
 def S():
-    success, nodes = grammar_rule(T_Noun, T_Verb, T_Property)
-    print(nodes)
-    node = {
-        'children': nodes,
-        'value': {
-            'object': nodes[0]['value'],
-            'verb': nodes[1]['value'],
-            'property': nodes[2]['value']
-        }
-    }
+    success, nodes = grammar_rule(Rule)
+    if success:
+        return True, {'children': nodes, 'value': nodes[0]['value']}
+    else:
+        success, nodes = grammar_rule(Rule, T_And, S)
 
-    return success, node
+    if success:
+        return True, {'children': nodes, 'value': nodes[2]['value'] + nodes[0]['value']}
+
+    return False, None
+
+def Rule():
+    success, nodes = grammar_rule(Noun_phrase_list, Predicate_list)
+    # print(nodes)
+    for node in nodes:
+        print(node['value'])
+    if success:
+        rules = []
+        for noun_conditions_map in nodes[0]['value']:
+            for noun, condition_list in noun_conditions_map.items():
+                if len(condition_list) == 0:
+                    for verb_targets_map in nodes[1]['value']:
+                        for verb, targets_list in verb_targets_map.items():
+                            for target in targets_list:
+                                rule = {'noun': noun, 'condition': None, 'verb': verb, 'target': target}
+                                rules.append(rule)
+                else:
+                    for condition in condition_list:
+                        for verb_targets_map in nodes[1]['value']:
+                            for verb, targets_list in verb_targets_map.items():
+                                for target in targets_list:
+                                    rule = {'noun': noun, 'condition': condition, 'verb': verb, 'target': target}
+                                    rules.append(rule)
+
+                
+                # print("Noun: {}".format(noun))
+                # print("Condition List: {}".format(condition_list))
+        return True, {'children': nodes, 'value': rules}
+    
+    return False, None
+
+def Noun_phrase_list():
+    success, nodes = grammar_rule(Noun_phrase)
+    if success:
+        return True, {'children': nodes, 'value': [nodes[0]['value']]}  # list containing singular nouns to conditions map
+    else:
+        success, nodes = grammar_rule(Noun_phrase, T_And, Noun_phrase_list)
+
+    if success:
+        return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}    # list of nouns to conditions maps
+
+    return False, None
+
+def Noun_phrase():
+    success, nodes = grammar_rule(Adjective, T_Noun, Preposition_phrase_list)
+    print(nodes)
+    if success:
+        return True, {'children': nodes, 'value': {
+            nodes[1]['value']: nodes[0]['value'] + nodes[2]['value']    # noun mapped to list of conditions applying to that noun
+        }}
+
+    return False, None
+
+def Adjective():
+    success, node = is_token('T_Adjective')
+    if success:
+        return True, {'children': [node], 'value': [node['value']]} # return list of singular adjective to make concatenation in Noun_phrase() easier
+
+    return True, {'children': None, 'value': []}   # epsilon rule always matches
+
+def Preposition_phrase_list():
+    success, nodes = grammar_rule(Preposition_phrase)
+    if success:
+        return True, {'children': nodes, 'value': [nodes[0]['value']]}  # list containing singular condition
+    else:
+        success, nodes = grammar_rule(Preposition_phrase, T_And, Preposition_phrase_list)
+
+    if success:
+        return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}  # list of conditions
+    else:
+        return True, {'children': None, 'value': []}   # epsilon rule always matches
+
+def Preposition_phrase():
+    success, nodes = grammar_rule(T_Preposition, T_Noun)
+    if success:
+        return True, {'children': nodes, 'value': nodes[0]['value'] + ' ' + nodes[1]['value']}  # e.g. ON GRASS
+
+    return False, None
+
+def Predicate_list():
+    success, nodes = grammar_rule(Predicate)
+    if success:
+        return True, {'children': nodes, 'value': [nodes[0]['value']]}  # list containing singular verb to properties mapping
+    else:
+        success, nodes = grammar_rule(Predicate, T_And, Predicate_list)
+
+    if success:
+        return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}    # list containing multiple verb to properties mappings
+    
+    return False, None
+
+def Predicate():
+    success, nodes = grammar_rule(T_Verb, Property_list)
+    if success:
+        return True, {'children': nodes, 'value': {
+            nodes[0]['value']: nodes[1]['value']
+        }}
+    else:
+        success, nodes = grammar_rule(T_Verb, T_Noun)
+
+    if success:
+        return True, {'children': nodes, 'value': {
+            nodes[0]['value']: [nodes[1]['value']]
+        }}
+
+def Property_list():
+    success, nodes = grammar_rule(T_Property)
+    if success:
+        return True, {'children': nodes, 'value': [nodes[0]['value']]}
+    else:
+        success, nodes = grammar_rule(T_Property, T_And, Property_list)
+
+    if success:
+        return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}
+
+    return False, None
 
 def T_Noun():
-    return is_token("T_Noun")
+    return is_token('T_Noun')
 
 def T_Verb():
-    return is_token("T_Verb")
+    return is_token('T_Verb')
 
 def T_Property():
-    return is_token("T_Property")
+    return is_token('T_Property')
+
+def T_Adjective():
+    return is_token('T_Adjective')
+
+def T_Preposition():
+    return is_token('T_Preposition')
+
+def T_Condition():
+    return is_token('T_Condition')
+
+def T_And():
+    return is_token('T_And')
+
+def T_Not():
+    return is_token('T_Not')
 
 # Evaluate LHS with RHS composed of a variable number of symbols. Returns success, nodes.
 def grammar_rule(*symbols):
@@ -73,16 +202,18 @@ def is_token(token_str):
         return True, {
             'children': None,
             'value': lexeme
-        }
+        }  # return list of nodes similar to grammar_rule()
     else:
         return False, None
         
     
 
-if __name__ == "__main__":
-    lex("BABA IS YOU")
+if __name__ == '__main__':
+    lex('BABA ON GRASS AND ON WALL IS YOU')
     print(token_stream)
 
-    print("Try parsing...")
+    print('Try parsing...')
     if parse():
-        print(root_node["value"])
+        print(root_node['value'])
+    else:
+        print("parsing FAILED")
