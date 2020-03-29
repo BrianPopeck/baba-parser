@@ -1,7 +1,7 @@
 TERMINAL_SYMBOLS = {    # from Fandom wiki; no support for Letters
     'T_And': ['AND'],
     'T_Not': ['NOT'],
-    'T_Noun': ['ALGI', 'ALL', 'ANNI', 'BABA', 'BAT', 'BELT', 'BIRD', 'BOG', 'BOLT', 'BOX', 'BRICK', 'BUBBLE', 'BUG', 'CAKE', 'CLIFF', 'CLOUD', 'COG', 'CRAB', 'CURSOR', 'DOOR', 'DUST', 'EMPTY', 'FENCE', 'FIRE', 'FLAG', 'FLOWER', 'FOLIAGE', 'FRUIT', 'FUNGUS', 'GHOST', 'GRASS', 'GROUP', 'HAND', 'HEDGE', 'ICE', 'IMAGE', 'JELLY', 'KEKE', 'KEY', 'LAVA', 'LEAF', 'LEVEL', 'LINE', 'LOVE', 'ME', 'MOON', 'ORB', 'PILLAR', 'PIPE', 'ROBOT', 'ROCK', 'ROCKET', 'ROSE', 'RUBBLE', 'SKULL', 'STAR', 'STATUE', 'SUN', 'TEXT', 'TILE', 'TREE', 'UFO', 'WALL', 'WATER'],
+    'T_Noun': ['ALGAE', 'ALL', 'ANNI', 'BABA', 'BAT', 'BELT', 'BIRD', 'BOG', 'BOLT', 'BOX', 'BRICK', 'BUBBLE', 'BUG', 'CAKE', 'CLIFF', 'CLOUD', 'COG', 'CRAB', 'CURSOR', 'DOOR', 'DUST', 'EMPTY', 'FENCE', 'FIRE', 'FLAG', 'FLOWER', 'FOLIAGE', 'FRUIT', 'FUNGUS', 'GHOST', 'GRASS', 'GROUP', 'HAND', 'HEDGE', 'ICE', 'IMAGE', 'JELLY', 'KEKE', 'KEY', 'LAVA', 'LEAF', 'LEVEL', 'LINE', 'LOVE', 'ME', 'MOON', 'ORB', 'PILLAR', 'PIPE', 'ROBOT', 'ROCK', 'ROCKET', 'ROSE', 'RUBBLE', 'SKULL', 'STAR', 'STATUE', 'SUN', 'TEXT', 'TILE', 'TREE', 'UFO', 'WALL', 'WATER'],
     'T_Verb': ['IS', 'HAS', 'MAKE', 'FEAR', 'EAT', 'FOLLOW', 'MIMIC', 'PLAY'],
     'T_Adjective': ['LONELY', 'IDLE', 'POWERED'],
     'T_Preposition': ['ON', 'NEAR', 'FACING', 'WITHOUT'],

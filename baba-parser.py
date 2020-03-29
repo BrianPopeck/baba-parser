@@ -10,9 +10,6 @@ def lex(string):
         token = tokenize(word)
         token_stream.append(token)
 
-
-
-
 def tokenize(token_str):
     for terminal, lexeme_list in TERMINAL_SYMBOLS.items():
         if token_str in lexeme_list:
@@ -39,6 +36,7 @@ def parse_file(filename):
                     print('PASSED -- {} has rules {}'.format(line, root_node['value']))
                 else:
                     print('FAILED -- {} could not be parsed'.format(line))
+                    raise ValueError('failed to parse rule from file {}'.format(filename))
 
 def S():
     global token_index
@@ -76,7 +74,7 @@ def Rule():
 def Noun_phrase_list():
     success, nodes = grammar_rule(Noun_phrase, T_And, Noun_phrase_list)
     if success:
-        return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}    # list of nouns to conditions maps
+        return True, {'children': nodes, 'value': [nodes[0]['value']] + nodes[2]['value']}    # list of nouns to conditions maps
     else:
         success, nodes = grammar_rule(Noun_phrase)
 
