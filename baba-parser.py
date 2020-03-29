@@ -1,4 +1,5 @@
 from terminal_symbols import TERMINAL_SYMBOLS
+from timeit import default_timer as timer
 
 token_stream = []
 token_index = 0
@@ -8,6 +9,9 @@ def lex(string):
     for word in word_list:
         token = tokenize(word)
         token_stream.append(token)
+
+
+
 
 def tokenize(token_str):
     for terminal, lexeme_list in TERMINAL_SYMBOLS.items():
@@ -19,59 +23,65 @@ def tokenize(token_str):
 def parse():
     return S()
 
+def parse_file(filename):
+    global token_stream
+    global token_index
+
+    with open(filename, 'r') as f:
+        lines = f.read().splitlines()
+        for line in lines:
+            if not line.startswith('//'):   # ignore comments
+                token_stream = []
+                token_index = 0
+                lex(line)
+                success, root_node = parse()
+                if success:
+                    print('PASSED -- {} has rules {}'.format(line, root_node['value']))
+                else:
+                    print('FAILED -- {} could not be parsed'.format(line))
+
 def S():
     global token_index
     
     success, nodes = grammar_rule(Rule)
-    if success and token_index == len(token_stream):    # make sure we have matched the entire stream
+    if success:    # note that it is ok if we have NOT matched the entire stream
         return True, {'children': nodes, 'value': nodes[0]['value']}
-    else:
-        success, nodes = grammar_rule(Rule, T_And, S)
-
-    if success and token_index == len(token_stream):
-        return True, {'children': nodes, 'value': nodes[2]['value'] + nodes[0]['value']}
 
     return False, None
 
 def Rule():
     success, nodes = grammar_rule(Noun_phrase_list, Predicate_list)
     if success:
-        for node in nodes:
-            print(node['value'])
-        if success:
-            rules = []
-            for noun_conditions_map in nodes[0]['value']:
-                for noun, condition_list in noun_conditions_map.items():
-                    if len(condition_list) == 0:
+        rules = []
+        for noun_conditions_map in nodes[0]['value']:
+            for noun, condition_list in noun_conditions_map.items():
+                if len(condition_list) == 0:
+                    for verb_targets_map in nodes[1]['value']:
+                        for verb, targets_list in verb_targets_map.items():
+                            for target in targets_list:
+                                rule = {'noun': noun, 'condition': None, 'verb': verb, 'target': target}
+                                rules.append(rule)
+                else:
+                    for condition in condition_list:
                         for verb_targets_map in nodes[1]['value']:
                             for verb, targets_list in verb_targets_map.items():
                                 for target in targets_list:
-                                    rule = {'noun': noun, 'condition': None, 'verb': verb, 'target': target}
+                                    rule = {'noun': noun, 'condition': condition, 'verb': verb, 'target': target}
                                     rules.append(rule)
-                    else:
-                        for condition in condition_list:
-                            for verb_targets_map in nodes[1]['value']:
-                                for verb, targets_list in verb_targets_map.items():
-                                    for target in targets_list:
-                                        rule = {'noun': noun, 'condition': condition, 'verb': verb, 'target': target}
-                                        rules.append(rule)
 
-                    
-                    # print("Noun: {}".format(noun))
-                    # print("Condition List: {}".format(condition_list))
-            return True, {'children': nodes, 'value': rules}
+        return True, {'children': nodes, 'value': rules}
     
     return False, None
 
 def Noun_phrase_list():
-    success, nodes = grammar_rule(Noun_phrase)
-    if success:
-        return True, {'children': nodes, 'value': [nodes[0]['value']]}  # list containing singular nouns to conditions map
-    else:
-        success, nodes = grammar_rule(Noun_phrase, T_And, Noun_phrase_list)
-
+    success, nodes = grammar_rule(Noun_phrase, T_And, Noun_phrase_list)
     if success:
         return True, {'children': nodes, 'value': nodes[0]['value'] + nodes[2]['value']}    # list of nouns to conditions maps
+    else:
+        success, nodes = grammar_rule(Noun_phrase)
+
+    if success:
+        return True, {'children': nodes, 'value': [nodes[0]['value']]}  # list containing singular nouns to conditions map
 
     return False, None
 
@@ -183,7 +193,6 @@ def grammar_rule(*symbols):
     saved_index = token_index
     nodes = []
     for symbol in symbols:
-        print(symbol)
         success, node = symbol()
         if success:
             nodes.append(node)
@@ -213,12 +222,16 @@ def is_token(token_str):
 
 if __name__ == '__main__':
     # lex("BABA IS YOU AND STOP")
-    lex('BABA ON GRASS AND ON WALL IS YOU AND STOP')
-    print(token_stream)
+    # lex('BABA ON GRASS AND ON WALL IS YOU AND STOP')
 
-    print('Try parsing...')
-    success, root_node = parse()
-    if success:
-        print(root_node['value'])
-    else:
-        print("parsing FAILED")
+    # print('Try parsing...')
+    # success, root_node = parse()
+    # if success:
+    #     print(root_node['value'])
+    # else:
+    #     print("parsing FAILED")
+
+    start = timer()
+    parse_file('ingame_rules.txt')
+    end = timer()
+    print("Took {} seconds to parse the strings in {}".format(end - start, 'ingame_rules.txt'))
