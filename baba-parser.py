@@ -221,15 +221,17 @@ def is_token(token_str):
 if __name__ == '__main__':
     # lex("BABA IS YOU AND STOP")
     # lex('BABA ON GRASS AND ON WALL IS YOU AND STOP')
+    lex('LONELY BABA NEAR GRASS IS YOU')
 
-    # print('Try parsing...')
-    # success, root_node = parse()
-    # if success:
-    #     print(root_node['value'])
-    # else:
-    #     print("parsing FAILED")
+    print('Try parsing...')
+    success, root_node = parse()
+    if success:
+        print(root_node['value'])
+    else:
+        print("parsing FAILED")
 
-    start = timer()
-    parse_file('ingame_rules.txt')
-    end = timer()
-    print("Took {} seconds to parse the strings in {}".format(end - start, 'ingame_rules.txt'))
+    # filename = 'gdctalk_rules.txt'
+    # start = timer()
+    # parse_file(filename)
+    # end = timer()
+    # print("Took {} seconds to parse the strings in {}".format(end - start, filename))

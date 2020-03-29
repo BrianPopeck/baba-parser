@@ -1,0 +1,14 @@
+//Slide 17
+BABA AND ROCK IS YOU
+BABA IS YOU AND MOVE
+BABA ON GRASS IS YOU
+// BABA ON GRASS AND FLOWER IS YOU
+//Slide 18
+LONELY BABA IS YOU
+//Slide 20 -- ignores the letters examples which would require changes to lexer and the stacked rules which can be implemented by parsing each combination of words
+// NOT BABA NOT ON NOT GRASS IS NOT YOU
+// NOT NOT NOT BABA IS YOU
+BABA ON GRASS AND NEAR WALL IS YOU
+BABA IS GRASS AND ROCK IS PUSH
+//Slide 22 -- to test 'if' support when implemented
+LONELY BABA NEAR GRASS IS YOU IF ROCK IS ON FLAG AND FACING RIGHT
