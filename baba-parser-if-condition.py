@@ -46,7 +46,6 @@ def S():
         success, nodes = grammar_rule(Rule, T_If, T_Noun, T_Verb, Preposition_phrase_list)
         if success:
             if_cond_rules = []
-            print(nodes[4]['value'])
             for condition in nodes[4]['value']:
                 if_cond_rule = {'noun': nodes[2]['value'], 'condition': condition, 'verb': nodes[3]['value']}
                 if_cond_rules.append(if_cond_rule)
