@@ -7,4 +7,5 @@ TERMINAL_SYMBOLS = {    # from Fandom wiki; no support for Letters
     'T_Preposition': ['ON', 'NEAR', 'FACING', 'WITHOUT'],
     'T_Condition': ['OFTEN', 'SELDOM'],
     'T_Property': ['YOU', 'STOP', 'PUSH', 'PULL', 'SWAP', 'TELE', 'MOVE', 'FALL', 'SHIFT', 'WIN', 'DEFEAT', 'SINK', 'HOT', 'MELT', 'SHUT', 'OPEN', 'WEAK', 'FLOAT', 'MORE', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'WORD', 'BEST', 'SLEEP', 'RED', 'BLUE', 'HIDE', 'BONUS', 'END', 'DONE', 'SAFE', 'SAD', 'WONDER', 'YOU2', 'POWER', 'SELECT', 'TURNCW', 'TURNCCW', 'STILL', 'CHILL', 'BACK', 'ORANGE', 'YELLOW', 'GREEN', 'PURPLE', 'PINK', 'WHITE', 'GREY', 'BLACK', 'BROWN', 'FALLDOWN', 'FALLLEFT', 'FALLUP', 'FALLRIGHT', 'BROKEN', 'NUDGEUP', 'NUDGEDOWN', 'NUDGELEFT', 'NUDGERIGHT'],
+    'T_If': ['IF'],
 }
